@@ -86,6 +86,15 @@ const Index = () => {
     color: 'hsl(var(--character-purple))',
     gradient: 'from-purple-600 to-blue-600'
   });
+  const [userProfile, setUserProfile] = useState({
+    name: 'Пользователь',
+    email: 'user@example.com',
+    avatar: '👤',
+    theme: 'dark',
+    language: 'ru',
+    notifications: true
+  });
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   
   const allCharacters = [...characters, ...customCharacters];
 
@@ -509,12 +518,12 @@ const Index = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h2 className="text-3xl font-bold mb-2">Пользователь</h2>
-                  <p className="text-muted-foreground">user@example.com</p>
+                  <h2 className="text-3xl font-bold mb-2">{userProfile.name}</h2>
+                  <p className="text-muted-foreground">{userProfile.email}</p>
                 </div>
-                <Button variant="outline">
-                  <Icon name="Edit" size={20} className="mr-2" />
-                  Редактировать
+                <Button variant="outline" onClick={() => setIsProfileDialogOpen(true)}>
+                  <Icon name="Settings" size={20} className="mr-2" />
+                  Настройки
                 </Button>
               </div>
             </Card>
@@ -703,6 +712,146 @@ const Index = () => {
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Настройки профиля</DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="profile">Профиль</TabsTrigger>
+              <TabsTrigger value="preferences">Предпочтения</TabsTrigger>
+              <TabsTrigger value="privacy">Приватность</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Имя</Label>
+                <Input
+                  value={userProfile.name}
+                  onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={userProfile.email}
+                  onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Аватар (эмодзи)</Label>
+                <Input
+                  value={userProfile.avatar}
+                  onChange={(e) => setUserProfile({ ...userProfile, avatar: e.target.value })}
+                  placeholder="👤"
+                />
+              </div>
+              <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full">
+                Сохранить изменения
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="preferences" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Тема интерфейса</Label>
+                <Select
+                  value={userProfile.theme}
+                  onValueChange={(value) => setUserProfile({ ...userProfile, theme: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dark">Тёмная</SelectItem>
+                    <SelectItem value="light">Светлая</SelectItem>
+                    <SelectItem value="auto">Автоматическая</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Язык интерфейса</Label>
+                <Select
+                  value={userProfile.language}
+                  onValueChange={(value) => setUserProfile({ ...userProfile, language: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ru">Русский</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <h4 className="font-semibold">Уведомления</h4>
+                  <p className="text-sm text-muted-foreground">Получать уведомления о новых сообщениях</p>
+                </div>
+                <Button
+                  variant={userProfile.notifications ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUserProfile({ ...userProfile, notifications: !userProfile.notifications })}
+                >
+                  {userProfile.notifications ? "Вкл" : "Выкл"}
+                </Button>
+              </div>
+              <Button onClick={() => setIsProfileDialogOpen(false)} className="w-full">
+                Сохранить изменения
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="space-y-4 py-4">
+              <Card className="p-4">
+                <div className="flex items-start gap-4">
+                  <Icon name="Lock" size={24} className="text-primary mt-1" />
+                  <div>
+                    <h4 className="font-semibold mb-2">Безопасность данных</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Ваши диалоги с персонажами хранятся локально и защищены.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-start gap-4">
+                  <Icon name="Eye" size={24} className="text-primary mt-1" />
+                  <div>
+                    <h4 className="font-semibold mb-2">Видимость профиля</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Управление тем, кто может видеть ваш профиль и персонажей.
+                    </p>
+                    <Select defaultValue="private">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Публичный</SelectItem>
+                        <SelectItem value="private">Приватный</SelectItem>
+                        <SelectItem value="friends">Только друзья</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </Card>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={() => {}}>
+                  <Icon name="Download" size={20} className="mr-2" />
+                  Экспортировать мои данные
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-destructive" onClick={() => {}}>
+                  <Icon name="Trash" size={20} className="mr-2" />
+                  Удалить все диалоги
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 
