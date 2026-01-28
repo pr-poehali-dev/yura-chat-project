@@ -22,6 +22,8 @@ type Character = {
   gradient: string;
   videoUrl?: string;
   customizable?: boolean;
+  premium?: boolean;
+  category?: 'default' | 'anime' | 'scenario';
 };
 
 type Message = {
@@ -39,7 +41,8 @@ const characters: Character[] = [
     personality: 'Мудрая и загадочная, любит говорить о смысле жизни и звёздах',
     avatar: '🌙',
     color: 'hsl(var(--character-purple))',
-    gradient: 'from-purple-600 to-blue-600'
+    gradient: 'from-purple-600 to-blue-600',
+    category: 'default'
   },
   {
     id: 2,
@@ -48,7 +51,8 @@ const characters: Character[] = [
     personality: 'Энергичный и смелый, всегда готов к новым открытиям',
     avatar: '🗺️',
     color: 'hsl(var(--character-orange))',
-    gradient: 'from-orange-500 to-red-500'
+    gradient: 'from-orange-500 to-red-500',
+    category: 'default'
   },
   {
     id: 3,
@@ -57,7 +61,8 @@ const characters: Character[] = [
     personality: 'Творческая душа, видит красоту в каждой детали',
     avatar: '🌸',
     color: 'hsl(var(--character-pink))',
-    gradient: 'from-pink-500 to-purple-500'
+    gradient: 'from-pink-500 to-purple-500',
+    category: 'default'
   },
   {
     id: 4,
@@ -66,12 +71,103 @@ const characters: Character[] = [
     personality: 'Увлечён технологиями и будущим человечества',
     avatar: '🤖',
     color: 'hsl(var(--character-blue))',
-    gradient: 'from-cyan-500 to-blue-600'
+    gradient: 'from-cyan-500 to-blue-600',
+    category: 'default'
+  }
+];
+
+const animeCharacters: Character[] = [
+  {
+    id: 101,
+    name: 'Наруто',
+    role: 'Ниндзя',
+    personality: 'Энергичный, никогда не сдаётся, мечтает стать Хокаге',
+    avatar: '🍥',
+    color: 'hsl(var(--character-orange))',
+    gradient: 'from-orange-500 to-yellow-500',
+    category: 'anime'
+  },
+  {
+    id: 102,
+    name: 'Луффи',
+    role: 'Пират',
+    personality: 'Свободолюбивый капитан, ищет легендарное сокровище',
+    avatar: '👒',
+    color: 'hsl(var(--character-orange))',
+    gradient: 'from-red-500 to-orange-500',
+    category: 'anime'
+  },
+  {
+    id: 103,
+    name: 'Микаса',
+    role: 'Боец',
+    personality: 'Сильная и преданная, защищает близких любой ценой',
+    avatar: '⚔️',
+    color: 'hsl(var(--character-purple))',
+    gradient: 'from-gray-600 to-red-600',
+    category: 'anime',
+    premium: true
+  },
+  {
+    id: 104,
+    name: 'Годжо',
+    role: 'Магистр',
+    personality: 'Самый сильный маг, уверенный и харизматичный',
+    avatar: '👁️',
+    color: 'hsl(var(--character-blue))',
+    gradient: 'from-blue-500 to-cyan-400',
+    category: 'anime',
+    premium: true
+  }
+];
+
+const scenarioCharacters: Character[] = [
+  {
+    id: 201,
+    name: 'Детектив Холмс',
+    role: 'Расследование',
+    personality: 'Раскрывайте преступления вместе с великим сыщиком',
+    avatar: '🔍',
+    color: 'hsl(var(--character-purple))',
+    gradient: 'from-purple-600 to-indigo-600',
+    category: 'scenario'
+  },
+  {
+    id: 202,
+    name: 'Космонавт',
+    role: 'Космическая миссия',
+    personality: 'Отправьтесь в путешествие к далёким планетам',
+    avatar: '🚀',
+    color: 'hsl(var(--character-blue))',
+    gradient: 'from-blue-600 to-purple-600',
+    category: 'scenario'
+  },
+  {
+    id: 203,
+    name: 'Маг академии',
+    role: 'Магическое обучение',
+    personality: 'Изучайте заклинания в легендарной академии магии',
+    avatar: '🔮',
+    color: 'hsl(var(--character-pink))',
+    gradient: 'from-purple-500 to-pink-500',
+    category: 'scenario',
+    premium: true
+  },
+  {
+    id: 204,
+    name: 'Капитан пиратов',
+    role: 'Пиратское приключение',
+    personality: 'Станьте частью команды и ищите сокровища',
+    avatar: '🏴‍☠️',
+    color: 'hsl(var(--character-orange))',
+    gradient: 'from-orange-600 to-red-600',
+    category: 'scenario',
+    premium: true
   }
 ];
 
 const Index = () => {
-  const [activeView, setActiveView] = useState<'home' | 'chat' | 'characters' | 'profile' | 'videos'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'chat' | 'characters' | 'profile' | 'videos' | 'anime' | 'scenarios' | 'premium'>('home');
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -95,10 +191,20 @@ const Index = () => {
     notifications: true
   });
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'default' | 'anime' | 'scenario'>('all');
   
-  const allCharacters = [...characters, ...customCharacters];
+  const allCharacters = [...characters, ...animeCharacters, ...scenarioCharacters, ...customCharacters];
+  
+  const filteredCharacters = selectedCategory === 'all' 
+    ? allCharacters 
+    : allCharacters.filter(char => char.category === selectedCategory || char.customizable);
 
   const startChat = (character: Character) => {
+    if (character.premium && !isPremium) {
+      setActiveView('premium');
+      return;
+    }
     setSelectedCharacter(character);
     setMessages([
       {
@@ -183,11 +289,34 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-              CharacterAI
+              hero.AI
             </h1>
             <p className="text-xl text-muted-foreground">
               Погрузись в мир живых разговоров с уникальными персонажами
             </p>
+            {!isPremium && (
+              <div className="mt-4 inline-block">
+                <Button 
+                  variant="outline" 
+                  className="gap-2 border-2 border-primary/50 hover:bg-primary/10"
+                  onClick={() => setActiveView('premium')}
+                >
+                  <Icon name="Crown" size={20} className="text-yellow-500" />
+                  Премиум за 90₽
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-center gap-4 mb-8">
+            <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as any)} className="w-full max-w-2xl">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="all">Все</TabsTrigger>
+                <TabsTrigger value="default">Основные</TabsTrigger>
+                <TabsTrigger value="anime">Аниме</TabsTrigger>
+                <TabsTrigger value="scenario">Сценарии</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="flex justify-center mb-8">
@@ -265,7 +394,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {allCharacters.map((character, index) => (
+            {filteredCharacters.map((character, index) => (
               <Card
                 key={character.id}
                 className="group relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 cursor-pointer animate-fade-in hover-scale"
@@ -281,7 +410,12 @@ const Index = () => {
                       {character.avatar}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold mb-1">{character.name}</h3>
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <h3 className="text-2xl font-bold">{character.name}</h3>
+                        {character.premium && (
+                          <Icon name="Crown" size={20} className="text-yellow-500" />
+                        )}
+                      </div>
                       <Badge variant="secondary" className="mb-3">
                         {character.role}
                       </Badge>
@@ -855,6 +989,99 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {activeView === 'premium' && (
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setActiveView('home')}
+            >
+              <Icon name="ArrowLeft" size={24} />
+            </Button>
+            <h1 className="text-4xl font-bold">Премиум подписка</h1>
+          </div>
+
+          <div className="grid gap-6">
+            <Card className="p-8 border-2 border-primary/50 bg-gradient-to-br from-purple-500/10 to-pink-500/10">
+              <div className="text-center mb-8">
+                <Icon name="Crown" size={64} className="text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-4xl font-bold mb-2">hero.AI Premium</h2>
+                <p className="text-2xl text-muted-foreground">Всего за 90₽</p>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start gap-3">
+                  <Icon name="Check" size={24} className="text-green-500 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg">Без рекламы</h4>
+                    <p className="text-sm text-muted-foreground">Наслаждайтесь общением без отвлечений</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Icon name="Check" size={24} className="text-green-500 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg">Эксклюзивные персонажи</h4>
+                    <p className="text-sm text-muted-foreground">Доступ к премиум аниме-героям и сценариям</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Icon name="Check" size={24} className="text-green-500 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg">Больший выбор ботов</h4>
+                    <p className="text-sm text-muted-foreground">Разблокируйте более 20 новых персонажей</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Icon name="Check" size={24} className="text-green-500 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg">Приоритетная поддержка</h4>
+                    <p className="text-sm text-muted-foreground">Быстрые ответы на ваши вопросы</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Icon name="Check" size={24} className="text-green-500 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg">Неограниченные сообщения</h4>
+                    <p className="text-sm text-muted-foreground">Общайтесь сколько угодно без лимитов</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                size="lg" 
+                className="w-full text-lg h-14"
+                onClick={() => {
+                  setIsPremium(true);
+                  setActiveView('home');
+                }}
+              >
+                <Icon name="Crown" size={24} className="mr-2" />
+                Оформить Premium за 90₽
+              </Button>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-4">Часто задаваемые вопросы</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-1">Как отменить подписку?</h4>
+                  <p className="text-sm text-muted-foreground">Вы можете отменить в любой момент в настройках профиля</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Есть ли пробный период?</h4>
+                  <p className="text-sm text-muted-foreground">Да, первые 7 дней бесплатно</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Когда спишется оплата?</h4>
+                  <p className="text-sm text-muted-foreground">Оплата происходит раз в месяц автоматически</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
       <div className="fixed bottom-8 right-8 flex flex-col gap-2 z-50">
         <Button
           size="icon"
@@ -888,6 +1115,16 @@ const Index = () => {
         >
           <Icon name="User" size={24} />
         </Button>
+        {!isPremium && (
+          <Button
+            size="icon"
+            className="w-14 h-14 rounded-full shadow-lg border-2 border-yellow-500"
+            variant={activeView === 'premium' ? 'default' : 'outline'}
+            onClick={() => setActiveView('premium')}
+          >
+            <Icon name="Crown" size={24} className="text-yellow-500" />
+          </Button>
+        )}
       </div>
     </div>
   );
